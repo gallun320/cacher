@@ -1,0 +1,14 @@
+{
+  "FileIntervalInMinutes": 3,
+  "CacheIntervalInMinutes": 1,
+  "ConnectionsList": [
+    {
+      "Exchange": "Binance",
+      "InstrumentName": "ALLP"
+    },
+    {
+      "Exchange": "Bitmex",
+      "InstrumentName": "MS"
+    }
+  ]
+}
