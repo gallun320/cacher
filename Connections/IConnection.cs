@@ -8,7 +8,6 @@ namespace RealTimeCacheApp.Connections
     public interface IConnection
     {
         ConnectionData Connection { get; }
-        Task<IEnumerable<TradeData>> GetTradeDataAsync();
         Task<IEnumerable<TradeData>> GetTradeDataAsync(string instrument, DateTime start, DateTime end);
         Task<IEnumerable<TradeData>> GetTradeDataSocketAsync();
     }

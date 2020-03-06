@@ -1,5 +1,6 @@
 ﻿using RealTimeCacheApp.Connections;
 using RealTimeCacheApp.Utils;
+using RealTimeCacheApp.Cacher;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,7 +12,7 @@ namespace RealTimeCacheApp
     {
         private readonly IParser _parser;
         private readonly List<IConnection> _connections;
-        private Cacher _cacher;
+        private Cache _cacher;
         public Startup()
         {
             _parser = new Parser();
@@ -28,7 +29,7 @@ namespace RealTimeCacheApp
                 _connections.Add(new ConnectorDummy(connection));
             }
 
-            _cacher = new Cacher(config.FileIntervalInMinutes, config.CacheIntervalInMinutes, _connections);
+            _cacher = new Cache(config.FileIntervalInMinutes, config.CacheIntervalInMinutes, _connections);
             Logger.Log("Init complete");
         }
 

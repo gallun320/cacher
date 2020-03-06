@@ -25,12 +25,6 @@ namespace RealTimeCacheApp.Connections
         }
 
         public ConnectionData Connection => _connect;
-        public async Task<IEnumerable<TradeData>> GetTradeDataAsync()
-        {
-            await Task.Delay(1000);
-            Logger.Log("Recieve data from Rest");
-            return await Task.FromResult(_trades);
-        }
 
         public async Task<IEnumerable<TradeData>> GetTradeDataAsync(string instrument, DateTime start, DateTime end)
         {
