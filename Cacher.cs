@@ -13,11 +13,13 @@ namespace RealTimeCacheApp
         private readonly List<IConnection> _connections;
         private readonly CacheWriter _cacheWriter;
         public TimeSpan CacheIntervalInMinutes { get; set; }
+        public TimeSpan FileIntervalInMinutes { get; set; }
 
         public Cacher(int fileIntervalInMinutes, int cacheIntervalInMinutes, IEnumerable<IConnection> connections)
         {
             CacheIntervalInMinutes = new TimeSpan(0, 0, cacheIntervalInMinutes, 0, 0);
-            _cacheWriter = new CacheWriter(new TimeSpan(0, 0, fileIntervalInMinutes, 0, 0));
+            FileIntervalInMinutes = new TimeSpan(0, 0, fileIntervalInMinutes, 0, 0);
+            _cacheWriter = new CacheWriter(FileIntervalInMinutes);
             _connections = connections.ToList();
         }
 
@@ -26,9 +28,20 @@ namespace RealTimeCacheApp
             var cacheLocal = new List<TradeData>();
             foreach (var connection in _connections)
             {
-                cacheLocal.AddRange(await connection.GetTradeDataAsync());
+                var file = $"{connection.Connection.Exchange}_{connection.Connection.InstrumentName}";
+                if (!_cacheWriter.CheckIfFileExistForConnection(file))
+                {
+                    cacheLocal.AddRange(await connection.GetTradeDataAsync());
+
+                    await _cacheWriter.WriteToLogNew(cacheLocal, file);
+                }
+                else
+                {
+                    cacheLocal.AddRange(await connection.GetTradeDataAsync(connection.Connection.InstrumentName, DateTime.UtcNow - FileIntervalInMinutes, DateTime.UtcNow));
+
+                    await _cacheWriter.WriteToLog(cacheLocal, file);
+                }
                 
-                await _cacheWriter.WriteToLog(cacheLocal, $"{connection.Connection.Exchange}_{connection.Connection.InstrumentName}");
             }
             
         }

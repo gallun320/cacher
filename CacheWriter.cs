@@ -11,38 +11,43 @@ namespace RealTimeCacheApp
     public class CacheWriter
     {
         private TimeSpan Delay; 
+
         public CacheWriter(TimeSpan delay)
         {
             Delay = delay;
         }
 
+        public bool CheckIfFileExistForConnection(string fileName)
+        {
+            var path = ConfigPaths.DataPath + fileName + ".txt";
+            return File.Exists(path);
+        }
+
+        public async Task WriteToLogNew(IEnumerable<TradeData> dataset, string fileName)
+        {
+            var path = ConfigPaths.DataPath + fileName + ".txt";
+            Logger.Log("Write to new file");
+            using (var sw = File.CreateText(path))
+            {
+                foreach (var data in dataset)
+                {
+                    await sw.WriteLineAsync(data.ToString());
+                }
+            }
+        }
+
         public async Task WriteToLog(IEnumerable<TradeData> dataset, string fileName)
         {
             var path = ConfigPaths.DataPath + fileName + ".txt";
-            if (!File.Exists(path))
+            var lines = await File.ReadAllLinesAsync(path);
+            File.Delete(path);
+            var correctDataForFile = CorrectingFileData(lines, dataset);
+            using (var sw = File.CreateText(path))
             {
-                
-                Logger.Log("Write to new file");
-                using (var sw = File.CreateText(path))
+                Logger.Log("Write to old file");
+                foreach (var data in correctDataForFile)
                 {
-                    foreach (var data in dataset)
-                    {
-                        await sw.WriteLineAsync(data.ToString());
-                    }
-                }
-            }
-            else
-            {
-                var lines = await File.ReadAllLinesAsync(path);
-                File.Delete(path);
-                var correctDataForFile = CorrectingFileData(lines, dataset);
-                using (var sw = File.CreateText(path))
-                {
-                    Logger.Log("Write to old file");
-                    foreach (var data in correctDataForFile)
-                    {
-                        await sw.WriteLineAsync(data);
-                    }
+                    await sw.WriteLineAsync(data);
                 }
             }
         }
